@@ -91,7 +91,8 @@
 #include <uORB/topics/mount_orientation.h>
 #include <uORB/topics/collision_report.h>
 #include <uORB/uORB.h>
-
+#include <uORB/topics/ca_trajectory.h>
+#include <v1.0/custom_messages/mavlink_msg_ca_trajectory.h>
 
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
@@ -3927,6 +3928,67 @@ protected:
 	}
 };
 
+class MavlinkStreamCaTrajectory : public MavlinkStream
+{
+public:
+    const char *get_name() const
+    {
+        return MavlinkStreamCaTrajectory::get_name_static();
+    }
+    static const char *get_name_static()
+    {
+        return "CA_TRAJECTORY";
+    }
+
+    static uint16_t get_id_static()
+    {
+    	return MAVLINK_MSG_ID_CA_TRAJECTORY;
+    }
+
+    uint16_t get_id()
+    {
+        return get_id_static();
+    }
+    static MavlinkStream *new_instance(Mavlink *mavlink)
+    {
+        return new MavlinkStreamCaTrajectory(mavlink);
+    }
+    unsigned get_size()
+    {
+        return MAVLINK_MSG_ID_CA_TRAJECTORY_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+    }
+
+private:
+    MavlinkOrbSubscription *_sub;
+    uint64_t _ca_trajectory_time;
+
+    /* do not allow top copying this class */
+    MavlinkStreamCaTrajectory(MavlinkStreamCaTrajectory &);
+    MavlinkStreamCaTrajectory& operator = (const MavlinkStreamCaTrajectory &);
+
+protected:
+    explicit MavlinkStreamCaTrajectory(Mavlink *mavlink) : MavlinkStream(mavlink),
+        _sub(_mavlink->add_orb_subscription(ORB_ID(ca_trajectory))),  // make sure you enter the name of your uorb topic here
+        _ca_trajectory_time(0)
+    {}
+
+    void send(const hrt_abstime t)
+    {
+        struct ca_trajectory_s _ca_trajectory;    //make sure ca_traj_struct_s is the definition of your uorb topic
+
+        if (_sub->update(&_ca_trajectory_time, &_ca_trajectory)) {
+            mavlink_ca_trajectory_t _msg_ca_trajectory;  //make sure mavlink_ca_trajectory_t is the definition of your custom mavlink message
+
+            _msg_ca_trajectory.timestamp = _ca_trajectory.timestamp;
+            _msg_ca_trajectory.time_start_usec = _ca_trajectory.time_start_usec;
+            _msg_ca_trajectory.time_stop_usec  = _ca_trajectory.time_stop_usec;
+            _msg_ca_trajectory.seq_id =_ca_trajectory.seq_id;
+
+            mavlink_msg_ca_trajectory_send_struct(_mavlink->get_channel(), &_msg_ca_trajectory);
+            //_mavlink->send_message(MAVLINK_MSG_ID_CA_TRAJECTORY, &_msg_ca_trajectory);
+        }
+    }
+};
 const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
 	new StreamListItem(&MavlinkStreamStatustext::new_instance, &MavlinkStreamStatustext::get_name_static, &MavlinkStreamStatustext::get_id_static),
@@ -3975,5 +4037,6 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamMountOrientation::new_instance, &MavlinkStreamMountOrientation::get_name_static, &MavlinkStreamMountOrientation::get_id_static),
 	new StreamListItem(&MavlinkStreamHighLatency::new_instance, &MavlinkStreamHighLatency::get_name_static, &MavlinkStreamWind::get_id_static),
 	new StreamListItem(&MavlinkStreamGroundTruth::new_instance, &MavlinkStreamGroundTruth::get_name_static, &MavlinkStreamGroundTruth::get_id_static),
+	new StreamListItem(&MavlinkStreamCaTrajectory::new_instance, &MavlinkStreamCaTrajectory::get_name_static, &MavlinkStreamGroundTruth::get_id_static),
 	nullptr
 };

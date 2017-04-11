@@ -289,7 +289,8 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_LOGGING_ACK:
 		handle_message_logging_ack(msg);
 		break;
-	case MAVLINK_MSG_ID_CA_TRAJECTORY:
+
+	case MAVLINK_MSG_ID_CA_TRAJECTORY:     //自定义
 	        handle_message_ca_trajectory_msg(msg);
 	        break;
 	default:
@@ -2048,27 +2049,23 @@ void MavlinkReceiver::handle_message_gps_rtcm_data(mavlink_message_t *msg)
 
 }
 void
-MavlinkReceiver::handle_message_ca_trajectory_msg(mavlink_message_t *msg)
+MavlinkReceiver::handle_message_ca_trajectory_msg(mavlink_message_t *msg)   //自定义
 {
     mavlink_ca_trajectory_t traj;
     mavlink_msg_ca_trajectory_decode(msg, &traj);
 
     struct ca_trajectory_s f;
-    memset(&f, 0, sizeof(f));
 
     f.timestamp = hrt_absolute_time();
     f.seq_id = traj.seq_id;
     f.time_start_usec = traj.time_start_usec;
     f.time_stop_usec = traj.time_stop_usec;
-    //for(int i=0;i<28;i++)
-        //f.coefficients[i] = traj.coefficients[i];
 
-    if (_ca_traj_msg_pub == nullptr) {
-        _ca_traj_msg_pub = orb_advertise(ORB_ID(ca_trajectory), &f);
+  //  PX4_INFO("receive_ca_trajectory:\t%8.4f\t%8.4f\t%8.4f", (double) f.seq_id,(double)f.time_start_usec,(double)f.time_stop_usec);
 
-    } else {
-        orb_publish(ORB_ID(ca_trajectory), _ca_traj_msg_pub, &f);
-    }
+       _ca_traj_msg_pub = orb_advertise(ORB_ID(ca_trajectory), &f);
+       orb_publish(ORB_ID(ca_trajectory), _ca_traj_msg_pub, &f);
+
 }
 void
 MavlinkReceiver::handle_message_hil_state_quaternion(mavlink_message_t *msg)

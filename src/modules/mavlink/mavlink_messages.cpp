@@ -92,7 +92,7 @@
 #include <uORB/topics/collision_report.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/ca_trajectory.h>
-#include <v1.0/custom_messages/mavlink_msg_ca_trajectory.h>
+//#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
 
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
@@ -3937,12 +3937,12 @@ public:
     }
     static const char *get_name_static()
     {
-        return "CA_TRAJECTORY";
+        return "CA_TRAJECTORY"; //消息包名字
     }
 
     static uint16_t get_id_static()
     {
-    	return MAVLINK_MSG_ID_CA_TRAJECTORY;
+    	return MAVLINK_MSG_ID_CA_TRAJECTORY;  //消息包ID
     }
 
     uint16_t get_id()
@@ -3983,6 +3983,10 @@ protected:
             _msg_ca_trajectory.time_start_usec = _ca_trajectory.time_start_usec;
             _msg_ca_trajectory.time_stop_usec  = _ca_trajectory.time_stop_usec;
             _msg_ca_trajectory.seq_id =_ca_trajectory.seq_id;
+            PX4_INFO("send_ca_trajectory:\t%8.4f\t%8.4f\t%8.4f",
+					 (double) _ca_trajectory.timestamp,
+					 (double)_ca_trajectory.time_start_usec,
+					 (double)_ca_trajectory.time_stop_usec);
 
             mavlink_msg_ca_trajectory_send_struct(_mavlink->get_channel(), &_msg_ca_trajectory);
             //_mavlink->send_message(MAVLINK_MSG_ID_CA_TRAJECTORY, &_msg_ca_trajectory);

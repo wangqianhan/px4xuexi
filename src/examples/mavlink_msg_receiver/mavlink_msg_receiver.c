@@ -24,13 +24,13 @@ static int daemon_task;	/* Handle of px4_simple_app task / thread */
 /*
  * Thread management program
  */
-__EXPORT int px4_simple_app_main(int argc, char *argv[]);
+__EXPORT int mavlink_msg_receiver_main(int argc, char *argv[]);
 
 /*
  * Main loop of px4_simple_app
  * user thread, which is used to execute user code
  */
-int px4_daemon_thread_main(int argc, char *argv[]);
+int mavlink_daemon_thread_main(int argc, char *argv[]);
 
 /*
  * print the correct usage for px4_simple_app operating
@@ -48,7 +48,7 @@ static void usage(const char *reason)
 /*
  * px4_simple_app模块的前台管理程序，由shell启动，可以控制模块的线程的启动和停止
  */
-int px4_simple_app_main(int argc, char *argv[])
+int mavlink_msg_receiver_main(int argc, char *argv[])
 {
 	if (argc < 2){
 		usage("missing command");
@@ -65,7 +65,7 @@ int px4_simple_app_main(int argc, char *argv[])
 									     SCHED_DEFAULT,	//the scheduling type
 										 SCHED_PRIORITY_DEFAULT, //the scheduling priority
 										 2000, //the stack size of the new process or thread
-										 px4_daemon_thread_main, //the task / thread main function
+										 mavlink_daemon_thread_main, //the task / thread main function
 										 (argv) ? (char *const *)&argv[2] : (char *const *)NULL); // a void pointer to pass to the new task, in case holding
 		//the commandline arguments
 		return 0;
@@ -93,7 +93,7 @@ int px4_simple_app_main(int argc, char *argv[])
 
 }
 
-int px4_daemon_thread_main(int argc, char *argv[])
+int mavlink_daemon_thread_main(int argc, char *argv[])
 {
 
 	warnx("[daemon] starting\n");
@@ -106,14 +106,12 @@ int px4_daemon_thread_main(int argc, char *argv[])
 		PX4_INFO("Hello Sky!");
 
 		/* subscribe to sensor_combined topic */
-		int sensor_sub_fd = orb_subscribe(ORB_ID(sensor_combined));
+		int sensor_sub_fd = orb_subscribe(ORB_ID(ca_trajectory));
 		/* limit the update rate to 5 Hz */
 		orb_set_interval(sensor_sub_fd, 200);
 
 		/* advertise attitude topic */
-		struct ca_trajectory_s att;
-		memset(&att, 0, sizeof(att));
-		orb_advert_t att_pub = orb_advertise(ORB_ID(ca_trajectory), &att);
+
 
 		/* one could wait for multiple topics with this technique, just using one here */
 		struct pollfd fds[] = {
@@ -147,16 +145,15 @@ int px4_daemon_thread_main(int argc, char *argv[])
 
 				if (fds[0].revents & POLLIN) {
 					/* obtained data for the first file descriptor */
-					struct sensor_combined_s raw;
+					struct ca_trajectory_s raw;
 					/* copy sensors raw data into local buffer */
-					orb_copy(ORB_ID(sensor_combined), sensor_sub_fd, &raw);
+					orb_copy(ORB_ID(ca_trajectory), sensor_sub_fd, &raw);
+					PX4_INFO("ca_trajectory:\t%8.4f\t%8.4f\t%8.4f",
+							(double)raw.time_start_usec,
+							(double)raw.time_stop_usec,
+							(double)raw.seq_id);
 
 
-					/* set att and publish this information for other apps */
-					att.time_start_usec = raw.accelerometer_m_s2[0];
-					att.time_stop_usec = raw.accelerometer_m_s2[1];
-					att.timestamp = raw.accelerometer_m_s2[2];
-					orb_publish(ORB_ID(ca_trajectory), att_pub, &att);
 				}
 
 				/* there could be more file descriptors here, in the form like:

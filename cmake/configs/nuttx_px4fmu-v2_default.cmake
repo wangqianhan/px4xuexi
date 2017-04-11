@@ -170,7 +170,8 @@ set(config_module_list
 	#examples/math_demo
 	# Tutorial code from
 	# https://px4.io/dev/px4_simple_app
-	#examples/px4_simple_app
+	examples/px4_simple_app
+        examples/mavlink_msg_receiver
 
 	# Tutorial code from
 	# https://px4.io/dev/daemon

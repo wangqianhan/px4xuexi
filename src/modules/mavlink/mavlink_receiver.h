@@ -78,8 +78,9 @@
 #include <uORB/topics/gps_inject_data.h>
 #include <uORB/topics/control_state.h>
 #include <uORB/topics/collision_report.h>
+
 #include <uORB/topics/ca_trajectory.h>
-#include <v1.0/custom_messages/mavlink_msg_ca_trajectory.h>
+//#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
 
 
 #include "mavlink_ftp.h"
@@ -153,6 +154,7 @@ private:
 	void handle_message_battery_status(mavlink_message_t *msg);
 	void handle_message_serial_control(mavlink_message_t *msg);
 	void handle_message_logging_ack(mavlink_message_t *msg);
+
 	void handle_message_ca_trajectory_msg(mavlink_message_t *msg);
 	void *receive_thread(void *arg);
 
@@ -235,6 +237,7 @@ private:
 	static const int _gps_inject_data_queue_size = 6;
 	orb_advert_t _gps_inject_data_pub;
 	orb_advert_t _command_ack_pub;
+	orb_advert_t _ca_traj_msg_pub; //自定义
 	int _control_mode_sub;
 	uint64_t _global_ref_timestamp;
 	int _hil_frames;
@@ -248,7 +251,6 @@ private:
 	double _time_offset_avg_alpha;
 	int64_t _time_offset;
 	int	_orb_class_instance;
-	orb_advert_t _ca_traj_msg_pub;
 	static constexpr unsigned MOM_SWITCH_COUNT = 8;
 
 	uint8_t _mom_switch_pos[MOM_SWITCH_COUNT];

@@ -94,7 +94,7 @@
 //#include <uORB/topics/ca_trajectory.h>
 //#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
 #include <uORB/topics/mavlink_test.h>
-#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
+//#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
 				   uint8_t *mavlink_base_mode, uint32_t *mavlink_custom_mode);

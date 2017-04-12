@@ -82,7 +82,7 @@
 //#include <uORB/topics/ca_trajectory.h>
 //#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
 #include <uORB/topics/mavlink_test.h>
-#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
+//#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
 
 #include "mavlink_ftp.h"
 

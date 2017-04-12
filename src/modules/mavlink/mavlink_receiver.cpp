@@ -133,7 +133,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_control_state_pub(nullptr),
 	_gps_inject_data_pub(nullptr),
 	_command_ack_pub(nullptr),
-	_zidingyi_msg_pub(nullptr),
+//	_zidingyi_msg_pub(nullptr),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_global_ref_timestamp(0),
 	_hil_frames(0),
@@ -2085,15 +2085,12 @@ MavlinkReceiver::handle_message_zidingyi_msg(mavlink_message_t *msg)
     f.x = traj.x;
     f.y = traj.y;
     f.z = traj.z;
-//    for(int i=0;i<28;i++)
-//        f.coefficients[i] = traj.coefficients[i];
 
-    if (_zidingyi_msg_pub == nullptr) {
         _zidingyi_msg_pub = orb_advertise(ORB_ID(mavlink_test), &f);
 
-    } else {
+
         orb_publish(ORB_ID(mavlink_test), _zidingyi_msg_pub, &f);
-    }
+
 }
 void
 MavlinkReceiver::handle_message_hil_state_quaternion(mavlink_message_t *msg)

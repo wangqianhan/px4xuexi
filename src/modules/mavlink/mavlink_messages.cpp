@@ -93,7 +93,8 @@
 #include <uORB/uORB.h>
 #include <uORB/topics/ca_trajectory.h>
 //#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
-
+#include <uORB/topics/mavlink_test.h>
+#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
 				   uint8_t *mavlink_base_mode, uint32_t *mavlink_custom_mode);
@@ -3993,6 +3994,66 @@ protected:
         }
     }
 };
+class MavlinkStreamMavlinkTest : public MavlinkStream
+{
+public:
+    const char *get_name() const
+    {
+        return MavlinkStreamMavlinkTest::get_name_static();
+    }
+
+    static const char *get_name_static()
+    {
+        return "ZIDINGYI";
+    }
+
+    static uint16_t get_id_static()
+    {
+        return MAVLINK_MSG_ID_ZIDINGYI;
+    }
+
+    uint16_t get_id()
+    {
+        return get_id_static();
+    }
+
+    static MavlinkStream *new_instance(Mavlink *mavlink)
+    {
+        return new MavlinkStreamMavlinkTest(mavlink);
+    }
+
+    unsigned get_size()
+    {
+        return MAVLINK_MSG_ID_ZIDINGYI_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+    }
+
+private:
+    MavlinkOrbSubscription *a_sub;
+    uint64_t _zidingyi_time;
+
+    MavlinkStreamMavlinkTest(MavlinkStreamMavlinkTest &);
+    MavlinkStreamMavlinkTest& operator = (const MavlinkStreamMavlinkTest &);
+
+protected:
+    explicit MavlinkStreamMavlinkTest(Mavlink *mavlink) : MavlinkStream(mavlink),
+        a_sub(_mavlink->add_orb_subscription(ORB_ID(mavlink_test))),_zidingyi_time(0) {}
+
+    void send(const hrt_abstime t)
+    {
+        struct mavlink_test_s _mavlink_test;    //make sure ca_trajectory_s is the definition of your uorb topic
+
+        if (a_sub->update(&_zidingyi_time, &_mavlink_test)) {
+
+        	mavlink_zidingyi_t msg;
+
+            msg.x = _mavlink_test.x;
+            msg.y  = _mavlink_test.y;
+            msg.z =_mavlink_test.z;
+
+            mavlink_msg_zidingyi_send_struct(_mavlink->get_channel(), &msg);
+        }
+    }
+};
 const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
 	new StreamListItem(&MavlinkStreamStatustext::new_instance, &MavlinkStreamStatustext::get_name_static, &MavlinkStreamStatustext::get_id_static),
@@ -4042,5 +4103,6 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamHighLatency::new_instance, &MavlinkStreamHighLatency::get_name_static, &MavlinkStreamWind::get_id_static),
 	new StreamListItem(&MavlinkStreamGroundTruth::new_instance, &MavlinkStreamGroundTruth::get_name_static, &MavlinkStreamGroundTruth::get_id_static),
 	new StreamListItem(&MavlinkStreamCaTrajectory::new_instance, &MavlinkStreamCaTrajectory::get_name_static, &MavlinkStreamGroundTruth::get_id_static),
+	new StreamListItem(&MavlinkStreamMavlinkTest::new_instance, &MavlinkStreamMavlinkTest::get_name_static, &MavlinkStreamMavlinkTest::get_id_static),
 	nullptr
 };

@@ -172,6 +172,8 @@ set(config_module_list
 	# https://px4.io/dev/px4_simple_app
 	examples/px4_simple_app
         examples/mavlink_msg_receiver
+	examples/mavlink_poll
+	examples/mavlink_push
 
 	# Tutorial code from
 	# https://px4.io/dev/daemon

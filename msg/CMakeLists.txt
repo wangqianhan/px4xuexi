@@ -128,6 +128,7 @@ set(msg_file_names
 	vtol_vehicle_status.msg
 	wind_estimate.msg
 	ca_trajectory.msg
+mavlink_test.msg
 	)
 
 # Get absolute paths

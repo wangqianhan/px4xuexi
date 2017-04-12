@@ -79,9 +79,10 @@
 #include <uORB/topics/control_state.h>
 #include <uORB/topics/collision_report.h>
 
-#include <uORB/topics/ca_trajectory.h>
+//#include <uORB/topics/ca_trajectory.h>
 //#include <v2.0/custom_messages/mavlink_msg_ca_trajectory.h>
-
+#include <uORB/topics/mavlink_test.h>
+#include <v2.0/test_messages/mavlink_msg_zidingyi.h>
 
 #include "mavlink_ftp.h"
 
@@ -155,7 +156,8 @@ private:
 	void handle_message_serial_control(mavlink_message_t *msg);
 	void handle_message_logging_ack(mavlink_message_t *msg);
 
-	void handle_message_ca_trajectory_msg(mavlink_message_t *msg);
+	void handle_message_zidingyi_msg(mavlink_message_t *msg);//新补充
+//	void handle_message_ca_trajectory_msg(mavlink_message_t *msg);
 	void *receive_thread(void *arg);
 
 	/**
@@ -237,7 +239,8 @@ private:
 	static const int _gps_inject_data_queue_size = 6;
 	orb_advert_t _gps_inject_data_pub;
 	orb_advert_t _command_ack_pub;
-	orb_advert_t _ca_traj_msg_pub; //自定义
+	orb_advert_t _zidingyi_msg_pub;
+//	orb_advert_t _ca_traj_msg_pub; //自定义
 	int _control_mode_sub;
 	uint64_t _global_ref_timestamp;
 	int _hil_frames;
